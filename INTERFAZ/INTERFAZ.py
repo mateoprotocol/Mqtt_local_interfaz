@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import random
+import csv
 #import paho.mqtt.client as mqtt
 
 # Configuración inicial
@@ -122,13 +123,22 @@ def save_edit(event):
 
 # Función para guardar los cambios en la primera columna editable
 def save_changes():
-    # Actualiza table_data con los valores actuales de la tabla
-    for i in range(filas):
-        table_data[i]["name"] = table.set(f'{i+1}', 'Editable')
-        table_data[i]["value"] = table.set(f'{i+1}', 'Value')
-        print(f"{i+1}-{table_data[i]['name']}-{table_data[i]['value']}")
-    
-    # Aquí podrías añadir código para guardar en un archivo o base de datos
+
+    with open('datos.csv', mode='a', newline='') as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow(["#","Nombre","Tiempo"])
+        
+        # Actualiza table_data con los valores actuales de la tabla
+        for i in range(filas):
+            table_data[i]["name"] = table.set(f'{i+1}', 'Editable')
+            table_data[i]["value"] = table.set(f'{i+1}', 'Value')
+            print(f"{i+1}-{table_data[i]['name']}-{table_data[i]['value']}")
+
+            datos = [i+1,table_data[i]["name"],table_data[i]["value"]]
+            escritor.writerow(datos)
+
+
+   
     refresh_table_view()
 
 # Creación de la tabla
