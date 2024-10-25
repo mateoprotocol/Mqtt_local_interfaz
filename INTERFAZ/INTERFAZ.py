@@ -153,6 +153,8 @@ table.column('#', width=50, anchor='center')  # Columna de numeración más estr
 table.column('Editable', width=150)
 table.column('Value', width=150)
 
+
+
 # Añadir las filas iniciales a la tabla
 for i in range(filas):
     table.insert('', 'end', iid=f'{i+1}', values=(i+1, table_data[i]["name"], table_data[i]["value"]))
@@ -185,6 +187,14 @@ def delete_row():
     except ValueError:
         print("Error: Ingrese un número válido")
 
+def reset():
+    
+    for i in range(20):
+        table_data[i] = {"name": "", "value": ""}
+
+    refresh_table_view()
+
+
 def valor_random():
     a = round(random.uniform(1.1, 5.5), 2)
     update_table(a)
@@ -199,6 +209,10 @@ delete_entry.grid(row=2, column=0, pady=10, padx=100, sticky='w')
 
 delete_button = tk.Button(root, text="Borrar", command=delete_row)
 delete_button.grid(row=2, column=0, columnspan=2, pady=10, padx=(5, 0), sticky='w')
+
+reset_button = tk.Button(root, text="Resetear", command=reset)
+reset_button.grid(row=2, column=1, columnspan=2, pady=10, padx=(5, 0), sticky='w')
+
 # Ajustes de tamaño para la tabla
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
