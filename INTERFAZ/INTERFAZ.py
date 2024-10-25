@@ -2,12 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 import random
 import csv
-#import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt
+import re
 
 # Configuración inicial
-#broker = "192.168.188.179"  # Cambia a 127.0.0.1 si es necesario
-#port = 1883  # Puerto por defecto de Mosquitto
-#topic = "categoria/rally"
+broker = "192.168.20.23"  # Cambia a 127.0.0.1 si es necesario
+port = 1883  # Puerto por defecto de Mosquitto
+topic = "categoria/rally"
+
 filas = 12
 table_data = [{"name": "", "value": ""} for i in range(filas)]
 
@@ -54,23 +56,28 @@ def refresh_table_view():
         table.item(f'{i+1}', values=(i+1, data["name"], data["value"]))
 
 # Función que maneja la recepción de mensajes
-# def on_message(client, userdata, msg):
-#     new_message = msg.payload.decode('utf-8')
-#     if "-" in new_message:
-#         pass
-#     else:    
-#         update_table(new_message)
+
+def on_message(client, userdata, msg):
+    new_message = msg.payload.decode('utf-8')
+    numero = re.search(r'\d+\.\d+|\d+', new_message)
+    if "-" in new_message:
+        pass
+    elif numero:
+        update_table(numero.group())
+    else:    
+        update_table(new_message)
+
 
 # Configuración del cliente MQTT
-# client = mqtt.Client()
-# # No se necesita usuario ni contraseña para Mosquitto local
-# client.connect(broker, port, 60)
+client = mqtt.Client()
+#  No se necesita usuario ni contraseña para Mosquitto local
+client.connect(broker, port, 60)
 
-# client.subscribe(topic)
-# client.on_message = on_message
+client.subscribe(topic)
+client.on_message = on_message
 
 # # Comienza el loop MQTT en segundo plano
-# client.loop_start()
+client.loop_start()
 
 # Configuración de la interfaz gráfica
 root = tk.Tk()
@@ -221,4 +228,4 @@ root.grid_columnconfigure(0, weight=1)
 root.mainloop()
 
 # Detiene el loop MQTT al cerrar la interfaz
-#client.loop_stop()
+client.loop_stop()
