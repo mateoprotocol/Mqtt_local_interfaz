@@ -8,7 +8,7 @@ import csv
 #broker = "192.168.188.179"  # Cambia a 127.0.0.1 si es necesario
 #port = 1883  # Puerto por defecto de Mosquitto
 #topic = "categoria/rally"
-filas = 20
+filas = 12
 table_data = [{"name": "", "value": ""} for i in range(filas)]
 
 def update_table(new_message):
@@ -189,7 +189,7 @@ def delete_row():
 
 def reset():
     
-    for i in range(20):
+    for i in range(filas):
         table_data[i] = {"name": "", "value": ""}
 
     refresh_table_view()
