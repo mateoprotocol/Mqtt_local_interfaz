@@ -49,11 +49,8 @@ def update_table(new_message):
         print("Error: El mensaje debe ser un número válido")
 
 def refresh_table_view():
-    # Actualiza la vista de la tabla con los datos actuales
     for i, data in enumerate(table_data):
-        table.set(f'{i+1}', '#', str(i+1))
-        table.set(f'{i+1}', 'Editable', data["name"])
-        table.set(f'{i+1}', 'Value', data["value"])
+        table.item(f'{i+1}', values=(i+1, data["name"], data["value"]))
 
 # Función que maneja la recepción de mensajes
 # def on_message(client, userdata, msg):
@@ -76,7 +73,7 @@ def refresh_table_view():
 
 # Configuración de la interfaz gráfica
 root = tk.Tk()
-root.geometry("400x500")# AnchoxAlto: 
+root.geometry("700x500")  # AnchoxAlto: 
 root.title("Posiciones")
 
 # Variables para la edición de celdas
@@ -150,31 +147,54 @@ table.column('Value', width=150)
 for i in range(filas):
     table.insert('', 'end', iid=f'{i+1}', values=(i+1, table_data[i]["name"], table_data[i]["value"]))
 
-table.grid(row=0, column=0, sticky='nsew')
+table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
 # Vincular la tabla con el evento de doble clic para editar
 table.bind("<Double-1>", edit_cell)
 
 # Botón para guardar los cambios
-save_button = tk.Button(root, text="Save Changes", command=save_changes)
+save_button = tk.Button(root, text="Guardar", command=save_changes)
 save_button.grid(row=1, column=0, pady=10)
+
+def delete_row():
+    try:
+        row_number = int(delete_entry.get())  # Obtener el número de fila del cuadro de texto
+        if 1 <= row_number <= filas:  # Verifica que el número esté en el rango válido
+            # Eliminar el dato de table_data
+            table_data[row_number - 1] = {"name": "", "value": ""}
+            
+            # Desplazar filas hacia arriba para llenar el espacio
+            for i in range(row_number - 1, filas - 1):
+                table_data[i] = table_data[i + 1]
+            table_data[filas - 1] = {"name": "", "value": ""}  # Limpiar la última fila
+            
+            refresh_table_view()  # Actualiza la vista de la tabla
+            delete_entry.delete(0, tk.END)  # Limpia el cuadro de texto
+        else:
+            print("Error: Número de fila no válido")
+    except ValueError:
+        print("Error: Ingrese un número válido")
 
 def valor_random():
     a = round(random.uniform(1.1, 5.5), 2)
     update_table(a)
 
-# boton para agregar valores
+# Botón para agregar valores
 add_button = tk.Button(root, text="add_value", command=valor_random)
 add_button.grid(row=1, column=1, pady=10)
 
+# Cuadro de texto y botón para borrar
+delete_entry = tk.Entry(root, width=10)
+delete_entry.grid(row=2, column=0, pady=10, padx=100, sticky='w')
+
+delete_button = tk.Button(root, text="Borrar", command=delete_row)
+delete_button.grid(row=2, column=0, columnspan=2, pady=10, padx=(5, 0), sticky='w')
 # Ajustes de tamaño para la tabla
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
 
-
 # Inicia el loop principal de la interfaz
 root.mainloop()
 
-
 # Detiene el loop MQTT al cerrar la interfaz
-#client.loop_stop() 
+#client.loop_stop()
