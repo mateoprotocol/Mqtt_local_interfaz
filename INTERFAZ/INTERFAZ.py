@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import random
 #import paho.mqtt.client as mqtt
 
 # Configuración inicial
@@ -7,38 +8,43 @@ from tkinter import ttk
 #port = 1883  # Puerto por defecto de Mosquitto
 #topic = "categoria/rally"
 filas = 20
-table_data = [{"name": f"Editable {i + 1}", "value": ""} for i in range(filas)]
+table_data = [{"name": "", "value": ""} for i in range(filas)]
 
 def update_table(new_message):
     global table_data
     try:
         # Convertir el nuevo mensaje a float para comparación numérica
         new_value = float(new_message)
-        
-        # Encontrar la posición donde insertar el nuevo valor
         inserted = False
+
+        # Buscar el lugar correcto para insertar el nuevo valor
         for i in range(len(table_data)):
             current_value = table_data[i]["value"]
             if current_value == "" or float(current_value) > new_value:
-                # Mover todos los elementos una posición hacia abajo
-                table_data = table_data[:i] + [{"name": f"Posición {i+1}", "value": str(new_value)}] + table_data[i:-1]
-                inserted = True
+                # Insertar el nuevo valor y mantener el nombre de la fila
+                if current_value == "":
+                    # Si la celda está vacía, solo asignar el nuevo valor
+                    table_data[i]["value"] = str(new_value)
+                else:
+                    # Insertar el nuevo valor antes del actual
+                    table_data.insert(i, {"name": "", "value": str(new_value)})
+                    inserted = True
+                
+                # Eliminar el último elemento si se excede el límite de 5
+                if len(table_data) > filas:
+                    table_data.pop()
                 break
         
-        # Si no se insertó (es el peor tiempo), y hay espacio, añadirlo al final
-        if not inserted and len(table_data) < 5:
-            table_data = table_data[:-1] + [{"name": f"Posición {len(table_data)}", "value": str(new_value)}]
-        
-        # Asegurar que solo tengamos 5 registros
-        table_data = table_data[:5]
-        
-        # Actualizar los nombres de las posiciones
-        for i in range(len(table_data)):
-            if table_data[i]["value"] != "":
-                table_data[i]["name"] = f"Posición {i+1}"
-        
+        # Si no se insertó y hay espacio, añadir el nuevo valor al final
+        if not inserted and len(table_data) < filas:
+            table_data.append({"name": f"Editable {len(table_data) + 1}", "value": str(new_value)})
+
+        # Asegurar que solo tengamos filas registros
+        table_data = table_data[:filas]
+
         # Actualiza la tabla visual
         refresh_table_view()
+
     except ValueError:
         print("Error: El mensaje debe ser un número válido")
 
@@ -153,10 +159,17 @@ table.bind("<Double-1>", edit_cell)
 save_button = tk.Button(root, text="Save Changes", command=save_changes)
 save_button.grid(row=1, column=0, pady=10)
 
+def valor_random():
+    a = round(random.uniform(1.1, 5.5), 2)
+    update_table(a)
+
+# boton para agregar valores
+add_button = tk.Button(root, text="add_value", command=valor_random)
+add_button.grid(row=1, column=1, pady=10)
+
 # Ajustes de tamaño para la tabla
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
-
 
 
 # Inicia el loop principal de la interfaz
